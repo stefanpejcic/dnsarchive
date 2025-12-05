@@ -12,5 +12,16 @@
         <button type="submit">Submit</button>
     </form>
 
+    <h2>Summary</h2>
+    {% if summary %}
+        <ul>
+            <li>Total Domains: {{ summary.total_domains }}</li>
+            <li>Total Checks: {{ summary.total_checks }}</li>
+            <li>Total Records: {{ summary.total_records }}</li>
+        </ul>
+    {% else %}
+        <p>No summary data available.</p>
+    {% endif %}
+
 </body>
 </html>
