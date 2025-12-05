@@ -3,7 +3,8 @@ import os
 import json
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-RESULTS_DIR = os.path.join(SCRIPT_DIR, "results")
+PARENT_DIR = os.path.dirname(SCRIPT_DIR)
+RESULTS_DIR = os.path.join(PARENT_DIR, "results")
 SUMMARY_BASE_DIR = os.path.join(SCRIPT_DIR, "summary")
 
 DNS_TYPES = ["A", "AAAA", "MX", "NS", "TXT", "SOA"]
