@@ -4,7 +4,7 @@ import sys
 import json
 import requests
 import dns.resolver
-from datetime import datetime
+from datetime import datetime, timedelta
 from threading import Thread
 import re
 
