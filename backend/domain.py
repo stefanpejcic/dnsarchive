@@ -17,6 +17,12 @@ DOMAIN = sys.argv[1]
 OUTDIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "results", DOMAIN)
 os.makedirs(OUTDIR, exist_ok=True)
 OUTFILE = os.path.join(OUTDIR, f"{datetime.now():%Y-%m-%d}.json")
+
+if os.path.exists(OUTFILE):
+    print(f"Abort: domain {DOMAIN} was already scanned in the last 24h.")
+    sys.exit(0)
+
+
 TIMESTAMP = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 def query_dns(name, record_type):
