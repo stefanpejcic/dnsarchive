@@ -3,8 +3,9 @@ import os
 import json
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-SUMMARY_BASE_DIR = os.path.join(SCRIPT_DIR, "summary")
-OUTPUT_FILE = os.path.join(SCRIPT_DIR, "total.json")
+PARENT_DIR = os.path.dirname(SCRIPT_DIR)
+OUTDIR = os.path.join(PARENT_DIR, "summary")
+OUTPUT_FILE = os.path.join(OUTDIR, "total.json")
 
 if not os.path.isdir(SUMMARY_BASE_DIR):
     print(f"No folder named '{SUMMARY_BASE_DIR}' found.")
