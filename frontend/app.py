@@ -6,7 +6,7 @@ import json
 app = Flask(__name__)
 
 FRONTEND_DIR = os.path.dirname(os.path.abspath(__file__))
-SCRIPTS_DIR = os.path.join(FRONTEND_DIR, "..", "scripts")
+SCRIPTS_DIR = os.path.join(FRONTEND_DIR, "..", "backend")
 SUMMARY_DIR = os.path.join(FRONTEND_DIR, "..", "summary")
 
 @app.route("/")
