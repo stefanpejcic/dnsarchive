@@ -38,10 +38,11 @@ for idx, domain in enumerate(domains, 1):
             for rtype in DNS_TYPES:
                 record_counts[rtype] += len(subdata.get(rtype, []))
 
-        summary[filename[:-5]] = {  # .json
+        summary[filename[:-5]] = {  # remove .json
             "subdomain_count": len(data.get("subdomains", {})),
             **record_counts,
-            "total": sum(record_counts.values())
+            "total": sum(record_counts.values()),
+            "changes": data.get("changes", 0)  # include the changes count
         }
 
     summary_file = os.path.join(domain_summary_dir, "summary.json")
