@@ -15,7 +15,7 @@ DOMAIN = sys.argv[1]
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(SCRIPT_DIR)  # One level above
-OUTDIR = os.path.join(PARENT_DIR, "results")
+OUTDIR = os.path.join(PARENT_DIR, "results", DOMAIN)
 os.makedirs(OUTDIR, exist_ok=True)
 DATE = datetime.now().strftime("%Y-%m-%d")
 TIMESTAMP = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
