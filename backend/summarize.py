@@ -3,7 +3,7 @@ import os
 import json
 
 RESULTS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "results")
-SUMMARY_BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "summary")
+SUMMARY_BASE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "summary")
 DNS_TYPES = ["A", "AAAA", "MX", "NS", "TXT", "SOA"]
 
 os.makedirs(SUMMARY_BASE_DIR, exist_ok=True)
