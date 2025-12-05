@@ -19,8 +19,15 @@ os.makedirs(OUTDIR, exist_ok=True)
 OUTFILE = os.path.join(OUTDIR, f"{datetime.now():%Y-%m-%d}.json")
 
 if os.path.exists(OUTFILE):
-    print(f"Abort: domain {DOMAIN} was already scanned in the last 24h.")
-    sys.exit(0)
+    file_mtime = datetime.fromtimestamp(os.path.getmtime(OUTFILE))
+    if datetime.now() - file_mtime < timedelta(hours=24):
+        with open(OUTFILE, "r") as f:
+            existing_content = json.load(f)
+        existing_content["message"] = f"Domain {DOMAIN} was already scanned in the last 24h. Showing existing file content."
+
+        print(json.dumps(existing_content, indent=2))
+        sys.exit(0)
+
 
 TIMESTAMP = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -36,6 +43,7 @@ dns_records = {rtype: query_dns(DOMAIN, rtype) for rtype in dns_types}
 # 1st json save
 output = {
     "domain": DOMAIN,
+    "message": f"Scanning in progress..",
     "timestamp": TIMESTAMP,
     "dns_records": dns_records,
     "subdomains": {},
@@ -78,6 +86,7 @@ def fetch_subdomains_and_compare():
             data = json.load(f)
             data["changes"] = changes_count
             data["previous"] = previous_file
+            data["message"] = f"Checking subdomains.."
             f.seek(0)
             json.dump(data, f, indent=2)
             f.truncate()
@@ -104,14 +113,12 @@ def fetch_subdomains_and_compare():
             data = json.load(f)
             data["subdomains"] = subdomains_data
             data["changes"] = changes_count
+            data["message"] = f"Completed"            
             f.seek(0)
             json.dump(data, f, indent=2)
             f.truncate()
 
-        print(f"Background: subdomain DNS records updated. Total changes: {changes_count}")
-
     except Exception as e:
         print(f"Background error: {e}")
-
 
 Thread(target=fetch_subdomains_and_compare, daemon=True).start()
