@@ -1,27 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>DNS History Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>DNS History Dashboard</h1>
+<body class="bg-gray-100 min-h-screen font-sans">
 
-    <form action="" method="GET" onsubmit="location.href='/domain/' + document.getElementById('domain').value; return false;">
-        <label for="domain">Select domain:</label>
-        <input type="text" name="domain" id="domain" required>
-        <button type="submit">Submit</button>
-    </form>
+    <div class="max-w-4xl mx-auto p-6">
 
-    <h2>Summary</h2>
-    {% if summary %}
-        <ul>
-            <li>Total Domains: {{ summary.total_domains }}</li>
-            <li>Total Checks: {{ summary.total_checks }}</li>
-            <li>Total Records: {{ summary.total_records }}</li>
-        </ul>
-    {% else %}
-        <p>No summary data available.</p>
-    {% endif %}
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">DNS History Dashboard</h1>
+
+        <!-- Domain Form -->
+        <form class="flex mb-8" onsubmit="location.href='/domain/' + document.getElementById('domain').value; return false;">
+            <input type="text" name="domain" id="domain" placeholder="Enter domain"
+                   class="flex-grow px-4 py-2 border rounded-l-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+            <button type="submit"
+                    class="px-6 py-2 bg-blue-500 text-white font-semibold rounded-r-md hover:bg-blue-600 transition">
+                Submit
+            </button>
+        </form>
+
+        <!-- Summary -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Summary</h2>
+            {% if summary %}
+                <ul class="space-y-2 text-gray-600">
+                    <li><span class="font-medium text-gray-800">Total Domains:</span> {{ summary.total_domains }}</li>
+                    <li><span class="font-medium text-gray-800">Total Checks:</span> {{ summary.total_checks }}</li>
+                    <li><span class="font-medium text-gray-800">Total Records:</span> {{ summary.total_records }}</li>
+                </ul>
+            {% else %}
+                <p class="text-gray-500">No summary data available.</p>
+            {% endif %}
+        </div>
+
+    </div>
 
 </body>
 </html>
