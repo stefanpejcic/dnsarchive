@@ -111,9 +111,13 @@ def fetch_subdomains_and_compare():
         # 3rd json update
         with open(OUTFILE, "r+") as f:
             data = json.load(f)
+            start_time = datetime.strptime(data["timestamp"], "%Y-%m-%d %H:%M:%S")
+            end_time = datetime.now()
+            duration = end_time - start_time
+        
             data["subdomains"] = subdomains_data
             data["changes"] = changes_count
-            data["message"] = f"Completed"            
+            data["message"] = f"Completed in {str(duration)}"           
             f.seek(0)
             json.dump(data, f, indent=2)
             f.truncate()
