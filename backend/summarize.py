@@ -6,6 +6,8 @@ RESULTS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 SUMMARY_BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "summary")
 DNS_TYPES = ["A", "AAAA", "MX", "NS", "TXT", "SOA"]
 
+os.makedirs(SUMMARY_BASE_DIR, exist_ok=True)
+
 if not os.path.isdir(RESULTS_DIR):
     print(f"No folder named '{RESULTS_DIR}' found.")
     exit(1)
