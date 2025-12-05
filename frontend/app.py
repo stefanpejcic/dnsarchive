@@ -23,9 +23,9 @@ def safe_domain_path(domain):
 
 @app.route("/")
 def index():
-    total_file = os.path.join(SUMMARY_DIR, "summary.json")
+    total_file = os.path.join(SUMMARY_DIR, "total.json")
     if not os.path.exists(total_file): # todo
-        summarize_script = os.path.join(SCRIPTS_DIR, "summarize.py")
+        summarize_script = os.path.join(SCRIPTS_DIR, "total.py")
         try:
             subprocess.run(["python3", summarize_script], check=True)
         except subprocess.CalledProcessError as e:
