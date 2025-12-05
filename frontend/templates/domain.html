@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DNS History Dashboard</title>
+</head>
+<body>
+    <h1>DNS History Dashboard</h1>
+
+    <form action="" method="GET" onsubmit="location.href='/domain/' + document.getElementById('domain').value; return false;">
+        <label for="domain">Select domain:</label>
+        <input type="text" name="domain" id="domain" required>
+        <button type="submit">Submit</button>
+    </form>
+
+
+
+  
+    {% if selected_domain %}
+    <h2>Domain: {{ selected_domain }}</h2>
+
+      {% if domain_summary %}
+      <h3>Summary (all days)</h3>
+      <pre>{{ domain_summary | tojson(indent=2) }}</pre>
+      {% endif %}
+  
+      {% if day_data %}
+      <h3>Data for {{ request.args.get("day") }}</h3>
+      <pre>{{ day_data | tojson(indent=2) }}</pre>
+      {% endif %}
+    {% endif %}
+</body>
+</html>
