@@ -23,7 +23,7 @@ if os.path.exists(OUTFILE):
     if datetime.now() - file_mtime < timedelta(hours=24):
         with open(OUTFILE, "r") as f:
             existing_content = json.load(f)
-        existing_content["message"] = f"Domain {DOMAIN} was already scanned in the last 24h. Showing existing file content."
+        existing_content["message"] = f"Domain {DOMAIN} was already scanned in the last 24h."
 
         print(json.dumps(existing_content, indent=2))
         sys.exit(0)
