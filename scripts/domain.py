@@ -12,7 +12,10 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 DOMAIN = sys.argv[1]
-OUTDIR = os.path.join("dns_history", DOMAIN)
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PARENT_DIR = os.path.dirname(SCRIPT_DIR)  # One level above
+OUTDIR = os.path.join(PARENT_DIR, "results")
 os.makedirs(OUTDIR, exist_ok=True)
 DATE = datetime.now().strftime("%Y-%m-%d")
 TIMESTAMP = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
