@@ -82,8 +82,6 @@ def fetch_subdomains_and_compare():
             json.dump(data, f, indent=2)
             f.truncate()
 
-        print(f"Initial main domain changes counted: {changes_count}, previous file: {previous_file}")
-
         # fetch data from CRT.sh
         resp = requests.get(f"https://crt.sh/?q=%25.{DOMAIN}&output=json", timeout=10)
         resp.raise_for_status()
