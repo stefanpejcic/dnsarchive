@@ -1,32 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" x-data="dnsHistoryApp()">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DNS History Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>DNS History Dashboard</h1>
+<body class="bg-gray-100 text-gray-900 font-sans min-h-screen p-4">
 
-    <form action="" method="GET" onsubmit="location.href='/domain/' + document.getElementById('domain').value; return false;">
-        <label for="domain">Select domain:</label>
-        <input type="text" name="domain" id="domain" required>
-        <button type="submit">Submit</button>
-    </form>
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-center">DNS History Dashboard</h1>
 
+        <!-- Domain Input -->
+        <form @submit.prevent="goToDomain" class="flex gap-2 mb-6">
+            <input type="text" x-model="domain" placeholder="Enter domain" class="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Search</button>
+        </form>
 
+        <!-- Selected Domain -->
+        <template x-if="selectedDomain">
+            <div>
+                <h2 class="text-xl font-semibold mb-4">Domain: <span class="text-blue-600" x-text="selectedDomain"></span></h2>
 
-  
-    {% if selected_domain %}
-    <h2>Domain: {{ selected_domain }}</h2>
+                <!-- Summary -->
+                <template x-if="domainSummary">
+                    <div class="mb-6">
+                        <h3 class="font-semibold mb-2">Summary (all days)</h3>
+                        <pre class="bg-white border border-gray-300 rounded p-4 overflow-auto text-sm" x-text="JSON.stringify(domainSummary, null, 2)"></pre>
+                    </div>
+                </template>
 
-      {% if domain_summary %}
-      <h3>Summary (all days)</h3>
-      <pre>{{ domain_summary | tojson(indent=2) }}</pre>
-      {% endif %}
-  
-      {% if day_data %}
-      <h3>Data for {{ request.args.get("day") }}</h3>
-      <pre>{{ day_data | tojson(indent=2) }}</pre>
-      {% endif %}
-    {% endif %}
+                <!-- Daily Records -->
+                <template x-if="dayData">
+                    <div>
+                        <h3 class="font-semibold mb-2">Data for <span x-text="selectedDay"></span></h3>
+                        <pre class="bg-white border border-gray-300 rounded p-4 overflow-auto text-sm" x-text="JSON.stringify(dayData, null, 2)"></pre>
+                    </div>
+                </template>
+
+                <!-- Dates List -->
+                <div class="mt-6">
+                    <h3 class="font-semibold mb-2">Available Dates</h3>
+                    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                        <template x-for="date in dates" :key="date">
+                            <div class="bg-white border border-gray-300 rounded p-2 text-center cursor-pointer hover:bg-blue-50" 
+                                 @click="loadDay(date)">
+                                <span x-text="date"></span>
+                                <div class="text-xs text-gray-500" x-text="dailyCounts[date] ? dailyCounts[date] + ' records' : ''"></div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- No domain selected -->
+        <template x-if="!selectedDomain">
+            <div class="text-gray-500 mt-6 text-center">Enter a domain to see its DNS history records.</div>
+        </template>
+    </div>
+
+    <script>
+        function dnsHistoryApp() {
+            return {
+                domain: '',
+                selectedDomain: '{{ selected_domain if selected_domain else "" }}',
+                selectedDay: '{{ request.args.get("day") if request.args.get("day") else "" }}',
+                domainSummary: {{ domain_summary | tojson() if domain_summary else 'null' }},
+                dayData: {{ day_data | tojson() if day_data else 'null' }},
+                dates: {{ all_dates | tojson() if all_dates else '[]' }},
+                dailyCounts: {{ daily_counts | tojson() if daily_counts else '{}' }},
+
+                goToDomain() {
+                    if (this.domain) {
+                        window.location.href = '/domain/' + this.domain;
+                    }
+                },
+
+                loadDay(date) {
+                    this.selectedDay = date;
+                    window.location.href = `/domain/${this.selectedDomain}?day=${date}`;
+                }
+            }
+        }
+    </script>
 </body>
 </html>
