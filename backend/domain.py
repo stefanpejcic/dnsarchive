@@ -29,7 +29,7 @@ if os.path.exists(OUTFILE):
         sys.exit(0)
 
 
-TIMESTAMP = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+TIMESTAMP = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z%z")
 
 def query_dns(name, record_type):
     try:
@@ -111,8 +111,8 @@ def fetch_subdomains_and_compare():
         # 3rd json update
         with open(OUTFILE, "r+") as f:
             data = json.load(f)
-            start_time = datetime.strptime(data["timestamp"], "%Y-%m-%d %H:%M:%S")
-            end_time = datetime.now()
+            start_time = datetime.fromisoformat(data["timestamp"])
+            end_time = datetime.now().astimezone()
             duration = end_time - start_time
         
             data["subdomains"] = subdomains_data
