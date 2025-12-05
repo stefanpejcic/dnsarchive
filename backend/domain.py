@@ -23,7 +23,7 @@ if os.path.exists(OUTFILE):
     if datetime.now() - file_mtime < timedelta(hours=24):
         with open(OUTFILE, "r") as f:
             existing_content = json.load(f)
-        existing_content["message"] = f"Domain {DOMAIN} was already scanned in the last 24h."
+        existing_content["message"] = f"DANGER: Domain {DOMAIN} was already scanned in the last 24h."
 
         print(json.dumps(existing_content, indent=2))
         sys.exit(0)
@@ -43,7 +43,7 @@ dns_records = {rtype: query_dns(DOMAIN, rtype) for rtype in dns_types}
 # 1st json save
 output = {
     "domain": DOMAIN,
-    "message": f"Scanning in progress..",
+    "message": f"INFO: Scanning in progress..",
     "timestamp": TIMESTAMP,
     "dns_records": dns_records,
     "subdomains": {},
@@ -86,7 +86,7 @@ def fetch_subdomains_and_compare():
             data = json.load(f)
             data["changes"] = changes_count
             data["previous"] = previous_file
-            data["message"] = f"Checking subdomains.."
+            data["message"] = f"WARNING: Checking subdomains.."
             f.seek(0)
             json.dump(data, f, indent=2)
             f.truncate()
@@ -117,7 +117,7 @@ def fetch_subdomains_and_compare():
         
             data["subdomains"] = subdomains_data
             data["changes"] = changes_count
-            data["message"] = f"Completed in {str(duration)}"           
+            data["message"] = f"SUCCESS: Completed in {str(duration)}"           
             f.seek(0)
             json.dump(data, f, indent=2)
             f.truncate()
