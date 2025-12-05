@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DNS History Dashboard</title>
+</head>
+<body>
+    <h1>DNS History Dashboard</h1>
+
+    <form action="" method="GET" onsubmit="location.href='/domain/' + document.getElementById('domain').value; return false;">
+        <label for="domain">Select domain:</label>
+        <input type="text" name="domain" id="domain" required>
+        <button type="submit">Submit</button>
+    </form>
+
+</body>
+</html>
