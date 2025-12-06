@@ -78,27 +78,31 @@
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">Data for <span x-text="selectedDay || 'latest'"></span></h3>
                     <div class="bg-white border border-gray-300 rounded p-4 overflow-auto text-sm">
-                        <div><strong>Timestamp:</strong> <span x-text="dayData.timestamp"></span></div>
-                        <div class="mt-2" x-for="[type, records] in Object.entries(dayData.dns_records)" :key="type">
-                            <strong x-text="type"></strong>:
-                            <template x-if="records.length">
-                                <ul class="ml-4 list-disc" >
-                                    <template x-for="record in records" :key="record">
-                                        <li x-text="record"></li>
-                                    </template>
-                                </ul>
-                            </template>
-                            <template x-if="!records.length">
-                                <span>None</span>
-                            </template>
-                        </div>
-                        <div class="mt-2"><strong>Changes:</strong> <span x-text="dayData.changes"></span></div>
-                        <div class="mt-2"><strong>Subdomains:</strong> <span x-text="Object.keys(dayData.subdomains).length"></span></div>
+                        <div class="mb-2"><strong>Timestamp:</strong> <span x-text="dayData.timestamp"></span></div>
+                        <div class="mb-2"><strong>Message:</strong> <span x-text="dayData.message || 'None'"></span></div>
+                        <div class="mb-2"><strong>Changes:</strong> <span x-text="dayData.changes"></span></div>
+                        <div class="mb-2"><strong>Subdomains:</strong> <span x-text="Object.keys(dayData.subdomains).length"></span></div>
+
+                        <template x-for="[type, records] in Object.entries(dayData.dns_records)" :key="type">
+                            <div class="mb-2">
+                                <strong x-text="type"></strong>:
+                                <template x-if="records.length">
+                                    <ul class="ml-4 list-disc">
+                                        <template x-for="record in records" :key="record">
+                                            <li x-text="record"></li>
+                                        </template>
+                                    </ul>
+                                </template>
+                                <template x-if="!records.length">
+                                    <span>None</span>
+                                </template>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </template>
 
-            <!-- Dates List -->
+            <!-- Dates List with changes count -->
             <div class="mt-6">
                 <h3 class="font-semibold mb-2">Available Dates</h3>
                 <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
@@ -107,7 +111,7 @@
                              :class="selectedDay === date ? 'bg-blue-100 font-semibold' : ''"
                              @click="loadDay(date)">
                             <span x-text="date"></span>
-                            <div class="text-xs text-gray-500" x-text="dailyCounts[date] ? dailyCounts[date].total + ' records' : ''"></div>
+                            <div class="text-xs text-gray-500" x-text="dailyCounts[date] ? dailyCounts[date].total + ' records, ' + dailyCounts[date].changes + ' changes' : ''"></div>
                         </div>
                     </template>
                 </div>
@@ -142,10 +146,7 @@ function dnsHistoryApp() {
 
         loadDay(date) {
             this.selectedDay = date;
-            // If you want a full page reload:
-            // window.location.href = `/domain/${this.selectedDomain}?day=${date}`;
-
-            // Dynamic fetch without reload:
+            // Dynamic fetch without reload
             fetch(`/api/domain/${this.selectedDomain}?day=${date}`)
                 .then(res => res.json())
                 .then(data => {
