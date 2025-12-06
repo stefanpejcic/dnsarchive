@@ -48,10 +48,8 @@
 
 
     <!-- Daily Data Section -->
-    <div class="bg-white shadow rounded p-4">
         <template x-if="selectedDay && dayData && !isLoading">
-
-            <div>
+            <div class="bg-white shadow rounded p-4">
                 <h2 class="font-bold text-xl mb-4">Data for <span x-text="selectedDay"></span></h2>
 
                 <!-- Notice -->
@@ -90,7 +88,6 @@
         <template x-if="!selectedDay">
             <div class="text-gray-500 text-center py-10">Select a date above to view DNS records.</div>
         </template>
-    </div>
 
 </div>
 
