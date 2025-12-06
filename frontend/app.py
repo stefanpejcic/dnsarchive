@@ -138,9 +138,9 @@ def domain_page(domain):
             domain_summary = {}
     
     return {
-        "selected_domain": domain,
-        "domain_summary": domain_summary,
-        "day_data": day_data
+        "domain": domain,
+        "summary": domain_summary,
+        "records": day_data
     }
 
 # --- Run App ---
