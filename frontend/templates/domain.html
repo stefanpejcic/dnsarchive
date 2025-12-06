@@ -126,10 +126,10 @@
 function dnsHistoryApp() {
     return {
         domain: '',
-        selectedDomain: '{{ selected_domain if selected_domain else "" }}',
+        selectedDomain: '{{ domain if domain else "" }}',
         selectedDay: '{{ request.args.get("day") if request.args.get("day") else "" }}',
-        domainSummary: {{ domain_summary | tojson() if domain_summary else 'null' }},
-        dayData: {{ day_data | tojson() if day_data else 'null' }},
+        domainSummary: {{ summary | tojson() if summary else 'null' }},
+        dayData: {{ records | tojson() if records else 'null' }},
         dates: {{ all_dates | tojson() if all_dates else '[]' }},
         dailyCounts: {{ daily_counts | tojson() if daily_counts else '{}' }},
 
