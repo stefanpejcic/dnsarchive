@@ -43,7 +43,6 @@ def api_or_template(template_name):
         def wrapper(*args, **kwargs):
             result = f(*args, **kwargs)
             if isinstance(result, tuple):
-                # handle (dict, status_code)
                 data, status = result
             else:
                 data, status = result, 200
@@ -86,7 +85,7 @@ def domain_page(domain):
     summary_file = safe_domain_path(domain)
     if not summary_file:
         return {"error": "Invalid or unsafe domain"}, 400
-
+    
     day = request.args.get("day")
     if day and not validate_day(day):
         return {"error": "Invalid day format, should be YYYY-MM-DD"}, 400
@@ -100,6 +99,12 @@ def domain_page(domain):
     domain_summary = {}
     day_data = {}
 
+    summarize_script = os.path.join(SCRIPTS_DIR, "summarize.py")
+    try:
+        subprocess.Popen(["python3", summarize_script])
+    except Exception as e:
+        return {"error": f"Error running domain script: {e}"}, 500
+    
     if os.path.isfile(summary_file):
         try:
             with open(summary_file) as f:
