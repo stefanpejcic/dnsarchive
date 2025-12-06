@@ -93,74 +93,67 @@
 
 <script>
 function dnsHistoryApp() {
-
-    
     return {
         domain: '{{ domain if domain else "" }}',
-        domainInputField: '{{ domain if domain else "" }}',
         selectedDay: '{{ request.args.get("day") if request.args.get("day") else "" }}',
-isLoading: false,
-autoRetry: null,
 
-    
-        
         dayData: {{ records | tojson() if records else 'null' }},
-        domainSummary: {{ summary | tojson() if summary else '{}' }},
         dates: {{ summary.keys() | list | tojson() if summary else '[]' }},
         dailyCounts: {{ summary | tojson() if summary else '{}' }},
 
+        isLoading: false,
+        retryTimer: null,
+
         init() {
+            // If no selectedDay, default to today
             if (!this.selectedDay) {
-                const today = new Date();
-                const yyyy = today.getFullYear();
-                const mm = String(today.getMonth() + 1).padStart(2, '0');
-                const dd = String(today.getDate()).padStart(2, '0');
-                this.selectedDay = `${yyyy}-${mm}-${dd}`;
+                const t = new Date();
+                this.selectedDay = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+            }
 
-                if (this.dates.includes(this.selectedDay)) {
-                    this.loadDay(this.selectedDay);
-                }
+            // If page loads and there is no data → start polling
+            if (!this.dayData) {
+                this.startPolling();
             }
         },
 
-        goToDomain() {
-            if (this.domain) {
-                window.location.href = '/domain/' + this.domain;
-            }
+        startPolling() {
+            clearTimeout(this.retryTimer);
+            this.isLoading = true;
+
+            this.retryTimer = setTimeout(() => {
+                this.loadDay(this.selectedDay);
+            }, 1000);
         },
 
-loadDay(date) {
-    this.selectedDay = date;
-    this.isLoading = true;
+        loadDay(date) {
+            this.selectedDay = date;
+            this.isLoading = true;
 
-    const url = new URL(window.location);
-    url.searchParams.set('day', date);
-    window.history.pushState({}, '', url);
+            const url = new URL(window.location);
+            url.searchParams.set('day', date);
+            window.history.pushState({}, '', url);
 
-    fetch(`/api/domain/${this.domainInputField}?day=${date}`)
-        .then(res => res.json())
-        .then(data => {
-            if (!data || !data.records) {
-                // No data → retry in 1 second
-                this.dayData = null;
-                clearTimeout(this.autoRetry);
-                this.autoRetry = setTimeout(() => this.loadDay(date), 1000);
-            } else {
-                // Data exists → stop retrying
-                clearTimeout(this.autoRetry);
-                this.dayData = data.records;
-            }
-        })
-        .catch(() => {
-            this.dayData = null;
-        })
-        .finally(() => {
-            this.isLoading = false;
-        });
-}
-
+            fetch(`/api/domain/${this.domain}?day=${date}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data || !data.records) {
+                        this.dayData = null;
+                        this.startPolling();  // keep retrying
+                    } else {
+                        clearTimeout(this.retryTimer);
+                        this.dayData = data.records;
+                        this.isLoading = false;
+                    }
+                })
+                .catch(() => {
+                    this.dayData = null;
+                    this.startPolling(); // retry on error
+                });
+        }
     }
 }
 </script>
+
 </body>
 </html>
