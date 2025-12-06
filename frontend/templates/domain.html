@@ -11,7 +11,7 @@
 
 <div class="max-w-6xl mx-auto p-4">
 
-    <!-- Top Section: Domain Input and Timeline -->
+    <!-- Top Section: Domain Input and Selected Domain -->
     <div class="bg-white shadow rounded p-4 mb-6">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <!-- Input -->
@@ -30,15 +30,22 @@
 
         <!-- Dates Timeline -->
         <div class="mt-4 overflow-x-auto">
-            <div class="flex gap-2">
+            <div class="flex gap-1 py-2">
                 <template x-for="date in dates" :key="date">
-                    <button @click="loadDay(date)"
-                            :class="selectedDay === date ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-blue-100'"
-                            class="flex-shrink-0 px-3 py-1 rounded text-sm whitespace-nowrap">
-                        <span x-text="date"></span>
-                        <span class="ml-1 text-xs text-gray-500" x-text="dailyCounts[date] ? dailyCounts[date].changes + ' changes' : ''"></span>
-                        <span class="ml-1 text-xs text-gray-500" x-text="dailyCounts[date] ? dailyCounts[date].total + ' total' : ''"></span>
-                    </button>
+                    <div class="flex flex-col items-center">
+                        <button @click="loadDay(date)"
+                                :class="{
+                                    'bg-blue-500 text-white': selectedDay === date,
+                                    'bg-gray-200 text-gray-700 hover:bg-blue-100': selectedDay !== date
+                                }"
+                                class="flex-shrink-0 w-10 h-10 rounded flex items-center justify-center text-xs relative">
+                            <span x-text="new Date(date).getDate()"></span>
+                            <!-- Change indicator -->
+                            <span x-show="dailyCounts[date] && dailyCounts[date].changes > 0"
+                                  class="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-red-500"></span>
+                        </button>
+                        <span class="text-xs text-gray-500 mt-1" x-text="date.split('-').slice(1).join('-')"></span>
+                    </div>
                 </template>
             </div>
         </div>
@@ -61,10 +68,10 @@
                 <div class="space-y-2 text-sm">
                     <div><strong>Timestamp:</strong> <span x-text="dayData.timestamp"></span></div>
                     <div><strong>Changes:</strong> <span x-text="dayData.changes"></span></div>
-                    <div><strong>Total Records:</strong> <span x-text="Object.keys(dayData.total).length"></span></div>
-                    <div><strong>Subdomains:</strong> <span x-text="Object.keys(dayData.subdomains).length"></span></div>
+                    <div><strong>Total Records:</strong> <span x-text="Object.keys(dayData.total || {}).length"></span></div>
+                    <div><strong>Subdomains:</strong> <span x-text="Object.keys(dayData.subdomains || {}).length"></span></div>
 
-                    <template x-for="[type, records] in Object.entries(dayData.dns_records)" :key="type">
+                    <template x-for="[type, records] in Object.entries(dayData.dns_records || {})" :key="type">
                         <div>
                             <strong x-text="type"></strong>:
                             <template x-if="records.length">
@@ -92,15 +99,30 @@
 
 <script>
 function dnsHistoryApp() {
+    // Generate last 1 year of dates in YYYY-MM-DD format
+    function generateLastYearDates() {
+        const dates = [];
+        const today = new Date();
+        for (let i = 0; i < 365; i++) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            dates.push(d.toISOString().split('T')[0]);
+        }
+        return dates.reverse();
+    }
+
     return {
         domain: '',
         selectedDomain: '{{ domain if domain else "" }}',
         selectedDay: '{{ request.args.get("day") if request.args.get("day") else "" }}',
-        
+
         dayData: {{ records | tojson() if records else 'null' }},
         domainSummary: {{ summary | tojson() if summary else '{}' }},
-        dates: {{ summary.keys() | list | tojson() if summary else '[]' }},
         dailyCounts: {{ summary | tojson() if summary else '{}' }},
+
+        dates: {{ summary.keys() | list | tojson() if summary else '[]' }}.length
+               ? {{ summary.keys() | list | tojson() }}
+               : generateLastYearDates(),
 
         goToDomain() {
             if (this.domain) {
@@ -113,7 +135,7 @@ function dnsHistoryApp() {
             fetch(`/api/domain/${this.selectedDomain}?day=${date}`)
                 .then(res => res.json())
                 .then(data => {
-                    this.dayData = data.records;
+                    this.dayData = data.records || { message: 'No data for this day.' };
                 })
                 .catch(err => {
                     console.error(err);
@@ -123,5 +145,6 @@ function dnsHistoryApp() {
     }
 }
 </script>
+
 </body>
 </html>
