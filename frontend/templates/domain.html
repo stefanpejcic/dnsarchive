@@ -76,7 +76,7 @@
             <!-- Daily Records -->
             <template x-if="dayData">
                 <div class="mb-6">
-                    <h3 class="font-semibold mb-2">Data for <span x-text="selectedDay"></span></h3>
+                    <h3 class="font-semibold mb-2">Data for <span x-text="selectedDay || 'latest'"></span></h3>
                     <div class="bg-white border border-gray-300 rounded p-4 overflow-auto text-sm">
                         <div><strong>Timestamp:</strong> <span x-text="dayData.timestamp"></span></div>
                         <div class="mt-2" x-for="[type, records] in Object.entries(dayData.dns_records)" :key="type">
@@ -107,7 +107,7 @@
                              :class="selectedDay === date ? 'bg-blue-100 font-semibold' : ''"
                              @click="loadDay(date)">
                             <span x-text="date"></span>
-                            <div class="text-xs text-gray-500" x-text="dailyCounts[date] ? dailyCounts[date] + ' records' : ''"></div>
+                            <div class="text-xs text-gray-500" x-text="dailyCounts[date] ? dailyCounts[date].total + ' records' : ''"></div>
                         </div>
                     </template>
                 </div>
@@ -128,10 +128,11 @@ function dnsHistoryApp() {
         domain: '',
         selectedDomain: '{{ domain if domain else "" }}',
         selectedDay: '{{ request.args.get("day") if request.args.get("day") else "" }}',
-        domainSummary: {{ summary | tojson() if summary else 'null' }},
+        
         dayData: {{ records | tojson() if records else 'null' }},
-        dates: {{ all_dates | tojson() if all_dates else '[]' }},
-        dailyCounts: {{ daily_counts | tojson() if daily_counts else '{}' }},
+        domainSummary: {{ summary | tojson() if summary else '{}' }},
+        dates: {{ summary.keys() | list | tojson() if summary else '[]' }},
+        dailyCounts: {{ summary | tojson() if summary else '{}' }},
 
         goToDomain() {
             if (this.domain) {
@@ -141,7 +142,19 @@ function dnsHistoryApp() {
 
         loadDay(date) {
             this.selectedDay = date;
-            window.location.href = `/domain/${this.selectedDomain}?day=${date}`;
+            // If you want a full page reload:
+            // window.location.href = `/domain/${this.selectedDomain}?day=${date}`;
+
+            // Dynamic fetch without reload:
+            fetch(`/api/domain/${this.selectedDomain}?day=${date}`)
+                .then(res => res.json())
+                .then(data => {
+                    this.dayData = data.records;
+                })
+                .catch(err => {
+                    console.error(err);
+                    this.dayData = { message: 'Could not load data for this day.' };
+                });
         }
     }
 }
