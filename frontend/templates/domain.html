@@ -104,6 +104,20 @@ function dnsHistoryApp() {
         dates: {{ summary.keys() | list | tojson() if summary else '[]' }},
         dailyCounts: {{ summary | tojson() if summary else '{}' }},
 
+        init() {
+            if (!this.selectedDay) {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                this.selectedDay = `${yyyy}-${mm}-${dd}`;
+
+                if (this.dates.includes(this.selectedDay)) {
+                    this.loadDay(this.selectedDay);
+                }
+            }
+        },
+
         goToDomain() {
             if (this.domain) {
                 window.location.href = '/domain/' + this.domain;
