@@ -11,6 +11,7 @@ app = Flask(__name__)
 FRONTEND_DIR = os.path.dirname(os.path.abspath(__file__))
 SCRIPTS_DIR = os.path.join(FRONTEND_DIR, "..", "backend")
 SUMMARY_DIR = os.path.join(FRONTEND_DIR, "..", "summary")
+RESULTS_DIR = os.path.join(FRONTEND_DIR, "..", "results")
 
 # stricter domain regex
 DOMAIN_REGEX = re.compile(r'^(?!-)(?:[a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,}$')
@@ -26,6 +27,18 @@ def safe_domain_path(domain):
     if not abs_path.startswith(os.path.abspath(SUMMARY_DIR)):
         return None
     return abs_path
+
+
+def safe_domain_date_file_path(domain, date):
+    if not DOMAIN_REGEX.match(domain):
+        return None
+    safe_domain = domain.replace("/", "").replace("\\", "")
+    path = os.path.join(RESULTS_DIR, safe_domain, f"{date}.json")
+    abs_path = os.path.abspath(path)
+    if not abs_path.startswith(os.path.abspath(RESULTS_DIR)):
+        return None
+    return abs_path
+
 
 def validate_day(day_str):
     if day_str:
@@ -104,16 +117,26 @@ def domain_page(domain):
         subprocess.Popen(["python3", summarize_script])
     except Exception as e:
         return {"error": f"Error running domain script: {e}"}, 500
+
+    day_data = {}
+
+
     
     if os.path.isfile(summary_file):
         try:
             with open(summary_file) as f:
                 domain_summary = json.load(f)
             if day and day in domain_summary:
-                day_data = domain_summary[day]
+                day_file = safe_domain_date_file_path(domain, day)
+                if os.path.isfile(day_file):
+                    try:
+                        with open(day_file, "r") as f:
+                            day_data = json.load(f)
+                    except json.JSONDecodeError:
+                        day_data = {}
         except json.JSONDecodeError:
             domain_summary = {}
-
+    
     return {
         "selected_domain": domain,
         "domain_summary": domain_summary,
