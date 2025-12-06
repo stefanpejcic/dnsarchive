@@ -88,8 +88,8 @@
 <script>
 function dnsHistoryApp() {
     return {
-        domain: '',
-        selectedDomain: '{{ domain if domain else "" }}',
+        domain: '{{ domain if domain else "" }}',
+        domainInputField: '{{ domain if domain else "" }}',
         selectedDay: '{{ request.args.get("day") if request.args.get("day") else "" }}',
         
         dayData: {{ records | tojson() if records else 'null' }},
@@ -124,7 +124,7 @@ function dnsHistoryApp() {
             url.searchParams.set('day', date);
             window.history.pushState({}, '', url);
         
-            fetch(`/api/domain/${this.selectedDomain}?day=${date}`)
+            fetch(`/api/domain/${this.domainInputField}?day=${date}`)
                 .then(res => res.json())
                 .then(data => {
                     this.dayData = data.records;
