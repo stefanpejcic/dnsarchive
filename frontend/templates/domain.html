@@ -37,11 +37,20 @@
         </div>
     </div>
 
+
+    <!-- Loader -->
+    <template x-if="isLoading || (!dayData && selectedDay)">
+        <div class="text-center py-10">
+            <div class="animate-spin h-10 w-10 border-4 border-gray-300 border-t-blue-500 rounded-full mx-auto"></div>
+            <p class="mt-3 text-gray-600 text-sm">Loading…</p>
+        </div>
+    </template>
+
+
     <!-- Daily Data Section -->
     <div class="bg-white shadow rounded p-4">
+        <template x-if="selectedDay && dayData && !isLoading">
 
-        
-        <template x-if="selectedDay && dayData">
             <div>
                 <h2 class="font-bold text-xl mb-4">Data for <span x-text="selectedDay"></span></h2>
 
@@ -87,10 +96,16 @@
 
 <script>
 function dnsHistoryApp() {
+
+    
     return {
         domain: '{{ domain if domain else "" }}',
         domainInputField: '{{ domain if domain else "" }}',
         selectedDay: '{{ request.args.get("day") if request.args.get("day") else "" }}',
+isLoading: false,
+autoRetry: null,
+
+    
         
         dayData: {{ records | tojson() if records else 'null' }},
         domainSummary: {{ summary | tojson() if summary else '{}' }},
@@ -117,23 +132,35 @@ function dnsHistoryApp() {
             }
         },
 
-        loadDay(date) {
-            this.selectedDay = date;
-        
-            const url = new URL(window.location);
-            url.searchParams.set('day', date);
-            window.history.pushState({}, '', url);
-        
-            fetch(`/api/domain/${this.domainInputField}?day=${date}`)
-                .then(res => res.json())
-                .then(data => {
-                    this.dayData = data.records;
-                })
-                .catch(err => {
-                    console.error(err);
-                    this.dayData = { message: 'Could not load data for this day.' };
-                });
-        }
+loadDay(date) {
+    this.selectedDay = date;
+    this.isLoading = true;
+
+    const url = new URL(window.location);
+    url.searchParams.set('day', date);
+    window.history.pushState({}, '', url);
+
+    fetch(`/api/domain/${this.domainInputField}?day=${date}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data || !data.records) {
+                // No data → retry in 1 second
+                this.dayData = null;
+                clearTimeout(this.autoRetry);
+                this.autoRetry = setTimeout(() => this.loadDay(date), 1000);
+            } else {
+                // Data exists → stop retrying
+                clearTimeout(this.autoRetry);
+                this.dayData = data.records;
+            }
+        })
+        .catch(() => {
+            this.dayData = null;
+        })
+        .finally(() => {
+            this.isLoading = false;
+        });
+}
 
     }
 }
