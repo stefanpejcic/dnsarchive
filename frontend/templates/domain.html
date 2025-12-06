@@ -9,89 +9,142 @@
 </head>
 <body class="bg-gray-100 text-gray-900 font-sans min-h-screen p-4">
 
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold mb-6 text-center">DNS History Dashboard</h1>
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-center">DNS History Dashboard</h1>
 
-        <!-- Domain Input -->
-        <form @submit.prevent="goToDomain" class="flex gap-2 mb-6">
-            <input type="text" x-model="domain" placeholder="Enter domain" class="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Search</button>
-        </form>
+    <!-- Domain Input -->
+    <form @submit.prevent="goToDomain" class="flex gap-2 mb-6">
+        <input type="text" x-model="domain" placeholder="Enter domain"
+               class="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Search</button>
+    </form>
 
-        <!-- Selected Domain -->
-        <template x-if="selectedDomain">
-            <div>
-                <h2 class="text-xl font-semibold mb-4">Domain: <span class="text-blue-600" x-text="selectedDomain"></span></h2>
+    <!-- Selected Domain -->
+    <template x-if="selectedDomain">
+        <div>
+            <h2 class="text-xl font-semibold mb-4">Domain: <span class="text-blue-600" x-text="selectedDomain"></span></h2>
 
-                <!-- Scan Message -->
-                <template x-if="dayData && dayData.message">
-                    <div class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-3 rounded mb-4">
-                        <strong>Notice:</strong>
-                        <span x-text="dayData.message"></span>
-                    </div>
-                </template>
+            <!-- Scan Message -->
+            <template x-if="dayData && dayData.message">
+                <div class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-3 rounded mb-4">
+                    <strong>Notice:</strong>
+                    <span x-text="dayData.message"></span>
+                </div>
+            </template>
 
-                <!-- Summary -->
-                <template x-if="domainSummary">
-                    <div class="mb-6">
-                        <h3 class="font-semibold mb-2">Summary (all days)</h3>
-                        <pre class="bg-white border border-gray-300 rounded p-4 overflow-auto text-sm" x-text="JSON.stringify(domainSummary, null, 2)"></pre>
-                    </div>
-                </template>
-
-                <!-- Daily Records -->
-                <template x-if="dayData">
-                    <div>
-                        <h3 class="font-semibold mb-2">Data for <span x-text="selectedDay"></span></h3>
-                        <pre class="bg-white border border-gray-300 rounded p-4 overflow-auto text-sm" x-text="JSON.stringify(dayData, null, 2)"></pre>
-                    </div>
-                </template>
-
-                <!-- Dates List -->
-                <div class="mt-6">
-                    <h3 class="font-semibold mb-2">Available Dates</h3>
-                    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-                        <template x-for="date in dates" :key="date">
-                            <div class="bg-white border border-gray-300 rounded p-2 text-center cursor-pointer hover:bg-blue-50" 
-                                 @click="loadDay(date)">
-                                <span x-text="date"></span>
-                                <div class="text-xs text-gray-500" x-text="dailyCounts[date] ? dailyCounts[date] + ' records' : ''"></div>
-                            </div>
-                        </template>
+            <!-- Summary Table -->
+            <template x-if="domainSummary && Object.keys(domainSummary).length">
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">Summary (all days)</h3>
+                    <div class="overflow-auto">
+                        <table class="table-auto border-collapse border border-gray-300 w-full text-sm">
+                            <thead>
+                                <tr class="bg-gray-200">
+                                    <th class="border border-gray-300 px-2 py-1">Date</th>
+                                    <th class="border border-gray-300 px-2 py-1">A</th>
+                                    <th class="border border-gray-300 px-2 py-1">AAAA</th>
+                                    <th class="border border-gray-300 px-2 py-1">MX</th>
+                                    <th class="border border-gray-300 px-2 py-1">NS</th>
+                                    <th class="border border-gray-300 px-2 py-1">SOA</th>
+                                    <th class="border border-gray-300 px-2 py-1">TXT</th>
+                                    <th class="border border-gray-300 px-2 py-1">Changes</th>
+                                    <th class="border border-gray-300 px-2 py-1">Subdomains</th>
+                                    <th class="border border-gray-300 px-2 py-1">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="[date, summary] in Object.entries(domainSummary)" :key="date">
+                                    <tr class="hover:bg-blue-50 cursor-pointer" @click="loadDay(date)">
+                                        <td class="border border-gray-300 px-2 py-1" x-text="date"></td>
+                                        <td class="border border-gray-300 px-2 py-1" x-text="summary.A"></td>
+                                        <td class="border border-gray-300 px-2 py-1" x-text="summary.AAAA"></td>
+                                        <td class="border border-gray-300 px-2 py-1" x-text="summary.MX"></td>
+                                        <td class="border border-gray-300 px-2 py-1" x-text="summary.NS"></td>
+                                        <td class="border border-gray-300 px-2 py-1" x-text="summary.SOA"></td>
+                                        <td class="border border-gray-300 px-2 py-1" x-text="summary.TXT"></td>
+                                        <td class="border border-gray-300 px-2 py-1" x-text="summary.changes"></td>
+                                        <td class="border border-gray-300 px-2 py-1" x-text="summary.subdomain_count"></td>
+                                        <td class="border border-gray-300 px-2 py-1" x-text="summary.total"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+            </template>
+
+            <!-- Daily Records -->
+            <template x-if="dayData">
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">Data for <span x-text="selectedDay"></span></h3>
+                    <div class="bg-white border border-gray-300 rounded p-4 overflow-auto text-sm">
+                        <div><strong>Timestamp:</strong> <span x-text="dayData.timestamp"></span></div>
+                        <div class="mt-2" x-for="[type, records] in Object.entries(dayData.dns_records)" :key="type">
+                            <strong x-text="type"></strong>:
+                            <template x-if="records.length">
+                                <ul class="ml-4 list-disc" >
+                                    <template x-for="record in records" :key="record">
+                                        <li x-text="record"></li>
+                                    </template>
+                                </ul>
+                            </template>
+                            <template x-if="!records.length">
+                                <span>None</span>
+                            </template>
+                        </div>
+                        <div class="mt-2"><strong>Changes:</strong> <span x-text="dayData.changes"></span></div>
+                        <div class="mt-2"><strong>Subdomains:</strong> <span x-text="Object.keys(dayData.subdomains).length"></span></div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Dates List -->
+            <div class="mt-6">
+                <h3 class="font-semibold mb-2">Available Dates</h3>
+                <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                    <template x-for="date in dates" :key="date">
+                        <div class="bg-white border border-gray-300 rounded p-2 text-center cursor-pointer hover:bg-blue-50"
+                             :class="selectedDay === date ? 'bg-blue-100 font-semibold' : ''"
+                             @click="loadDay(date)">
+                            <span x-text="date"></span>
+                            <div class="text-xs text-gray-500" x-text="dailyCounts[date] ? dailyCounts[date] + ' records' : ''"></div>
+                        </div>
+                    </template>
+                </div>
             </div>
-        </template>
 
-        <!-- No domain selected -->
-        <template x-if="!selectedDomain">
-            <div class="text-gray-500 mt-6 text-center">Enter a domain to see its DNS history records.</div>
-        </template>
-    </div>
+        </div>
+    </template>
 
-    <script>
-        function dnsHistoryApp() {
-            return {
-                domain: '',
-                selectedDomain: '{{ selected_domain if selected_domain else "" }}',
-                selectedDay: '{{ request.args.get("day") if request.args.get("day") else "" }}',
-                domainSummary: {{ domain_summary | tojson() if domain_summary else 'null' }},
-                dayData: {{ day_data | tojson() if day_data else 'null' }},
-                dates: {{ all_dates | tojson() if all_dates else '[]' }},
-                dailyCounts: {{ daily_counts | tojson() if daily_counts else '{}' }},
+    <!-- No domain selected -->
+    <template x-if="!selectedDomain">
+        <div class="text-gray-500 mt-6 text-center">Enter a domain to see its DNS history records.</div>
+    </template>
+</div>
 
-                goToDomain() {
-                    if (this.domain) {
-                        window.location.href = '/domain/' + this.domain;
-                    }
-                },
+<script>
+function dnsHistoryApp() {
+    return {
+        domain: '',
+        selectedDomain: '{{ selected_domain if selected_domain else "" }}',
+        selectedDay: '{{ request.args.get("day") if request.args.get("day") else "" }}',
+        domainSummary: {{ domain_summary | tojson() if domain_summary else 'null' }},
+        dayData: {{ day_data | tojson() if day_data else 'null' }},
+        dates: {{ all_dates | tojson() if all_dates else '[]' }},
+        dailyCounts: {{ daily_counts | tojson() if daily_counts else '{}' }},
 
-                loadDay(date) {
-                    this.selectedDay = date;
-                    window.location.href = `/domain/${this.selectedDomain}?day=${date}`;
-                }
+        goToDomain() {
+            if (this.domain) {
+                window.location.href = '/domain/' + this.domain;
             }
+        },
+
+        loadDay(date) {
+            this.selectedDay = date;
+            window.location.href = `/domain/${this.selectedDomain}?day=${date}`;
         }
-    </script>
+    }
+}
+</script>
 </body>
 </html>
