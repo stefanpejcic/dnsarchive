@@ -110,6 +110,11 @@ function dnsHistoryApp() {
 
         loadDay(date) {
             this.selectedDay = date;
+        
+            const url = new URL(window.location);
+            url.searchParams.set('day', date);
+            window.history.pushState({}, '', url);
+        
             fetch(`/api/domain/${this.selectedDomain}?day=${date}`)
                 .then(res => res.json())
                 .then(data => {
@@ -120,6 +125,7 @@ function dnsHistoryApp() {
                     this.dayData = { message: 'Could not load data for this day.' };
                 });
         }
+
     }
 }
 </script>
